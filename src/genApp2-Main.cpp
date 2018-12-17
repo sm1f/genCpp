@@ -3,15 +3,12 @@
 
 
 #include "common.h"
-#include "Simple.h"
 
 
 int main(int argc, const char** argv)
 {
-  cout << "genApp V0.0" << endl;
+  cout << "genApp2 V0.0" << endl;
 
-  Simple* root = new Simple();
-  
   int result = -1;
   //int result = that.RunMain();
 

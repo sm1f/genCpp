@@ -53,4 +53,15 @@ clean:
 cleanForGit: clean
 	rm -f $(SRC_DIR)/*~
 
+help:
+	$(info make all)
+	$(info -   default)
+	$(info -   make all apps - currently not working correctly)
+	$(info make clean)
+	$(info -   remove obj and app dirs)
+	$(info -   needs work)
+	$(info make cleanForGit)
+	$(info -   deletes generated directories)
+	$(info make help)
+	$(info -   prints this message)
 -include $(DEPS)

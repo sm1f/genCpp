@@ -2,30 +2,25 @@ SRC_DIR:=src
 OBJ_DIR:=obj
 APP_DIR:=app
 
-SRCS_ALL:= $(wildcard $(SRC_DIR)/*.cpp)
-SRCS_MAIN:= $(wildcard $(SRC_DIR)/*Main.cpp)
+SRC_HEADERS=$(wildcard $(SRC_DIR)/*.h)
 
-OBJS_ALL:=  $(patsubst $(SRC_DIR)/%.cpp,$(OBJ_DIR)/%.o,$(SRCS_ALL))
-OBJS_MAIN:=  $(patsubst $(SRC_DIR)/%Main.cpp,$(OBJ_DIR)/%Main.o,$(SRCS_MAIN))
-OBJS_NON_MAIN:= $(filter-out $(OBJS_MAIN), $(OBJS_ALL))
+SRC_ALL:= $(wildcard $(SRC_DIR)/*.cpp)
+SRC_MAINS:= $(wildcard $(SRC_DIR)/*Main.cpp)
+SRC_NON_MAINS:= $(filter-out $(SRC_MAINS), $(SRC_ALL))
 
-ALL_APPS:= $(patSubst $(SRC_DIR)/%-Main.cpp,$(APP_DIR)/%,$(SRCS:.cpp=.exe))
-#ALL_APPS:= $(APP_DIR)/genApp
+OBJ_ALL:=  $(patsubst $(SRC_DIR)/%.cpp,$(OBJ_DIR)/%.o,$(SRC_ALL))
+OBJ_MAINS:=  $(patsubst $(SRC_DIR)/%Main.cpp,$(OBJ_DIR)/%Main.o,$(SRC_MAINS))
+OBJ_NON_MAINS:= $(filter-out $(OBJ_MAINS), $(OBJ_ALL))
 
-all: app/genApp app/genApp2
-	echo $(ALL_APPS)
-	echo $(SRCS_ALL)
-	echo $(OBJS_ALL)
-	echo "OBJS_MAIN:" $(OBJS_MAIN)
-	echo $(OBJS_NON_MAIN)
+APP_ALL:= $(SRC_MAINS:$(SRC_DIR)/%-Main.cpp=$(APP_DIR)/%.exe)
 
+all: $(OBJ_ALL) $(APP_ALL)
 
 MK_OBJ_DIR:
 	@mkdir -p $(OBJ_DIR)
 MK_APP_DIR:
 	@mkdir -p $(APP_DIR)
 
-HEADERS=$(wildcard $(SRC_DIR)/*.h)
 DEPS=$(SOURCES:.cpp=.d)
 
 CFLAGS+=-MMD
@@ -38,9 +33,18 @@ CXXFLAGS+= -Wno-unused-parameter -Wall  -g -O2 -MMD -Wno-unused-variable -std=c+
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp | MK_OBJ_DIR
 	g++ $(CXXFLAGS) -c -o $@ $<
 
+$(APP_DIR)/%.exe: $(OBJ_ALL) | MK_APP_DIR
+	g++ -Wall -Wextra -g -O2 -o $@ $(OBJ_NON_MAINS) $(@:$(APP_DIR)/%.exe=$(OBJ_DIR)/%-Main.o)
 
-$(APP_DIR)/%:  $(OBJ_DIR)/%-Main.o $(OBJS_NON_MAIN) $(HEADERS) | MK_APP_DIR
-	g++ -Wall -Wextra -g -O2 -o $@ $(OBJS_NON_MAIN) $(OBJ_DIR)/$(notdir $@)-Main.o
+#$(APP_DIR)/%.exe:  $(OBJ_ALL) $(SRC_HEADERS) | MK_APP_DIR
+
+#g++ -Wall -Wextra -g -O2 -o $@ $(OBJ_NON_MAINS) $(OBJ_DIR)/$(notdir $@)-Main.o
+
+
+
+
+#$(APP_DIR)/%:  $(OBJ_DIR)/%-Main.o $(OBJS_NON_MAIN) $(SRC_HEADERS) | MK_APP_DIR
+#	g++ -Wall -Wextra -g -O2 -o $@ $(OBJS_NON_MAIN) $(OBJ_DIR)/$(notdir $@)-Main.o
 
 .PRECIOUS: $(OBJ_DIR)/%.o
 
@@ -52,6 +56,23 @@ clean:
 .PHONY: cleanForGit
 cleanForGit: clean
 	rm -f $(SRC_DIR)/*~
+
+printVars:
+	$(info APP_ALL $(APP_ALL))
+	$(info SRC_MAINS $(SRC_MAINS))
+	$(info SRC_DIR $(SRC_DIR))
+
+hack:
+	$(info SRC_DIR $(SRC_DIR))
+	$(info OBJ_DIR $(OBJ_DIR))
+	$(info APP_DIR $(APP_DIR))
+	$(info SRC_ALL $(SRC_ALL))
+	$(info SRC_MAINS $(SRC_MAINS))
+	$(info SRC_NON_MAINS $(SRC_NON_MAINS))
+	$(info OBJ_ALL $(OBJ_ALL))
+	$(info OBJ_MAINS $(OBJ_MAINS))
+	$(info OBJ_NON_MAINS $(OBJ_NON_MAINS))
+
 
 help:
 	$(info make all)
